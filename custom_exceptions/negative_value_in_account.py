@@ -1,0 +1,2 @@
+class NegativeValueInAccount(Exception):
+    pass
