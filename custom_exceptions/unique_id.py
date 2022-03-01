@@ -1,0 +1,2 @@
+class UniqueIdInUse(Exception):
+    pass

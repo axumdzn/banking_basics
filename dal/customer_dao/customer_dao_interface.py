@@ -10,5 +10,5 @@ class CustomerInterface(ABC):
         pass
 
     @abstractmethod
-    def delete_customer_by_id(self, customer_id: int) -> bool:
+    def delete_customer_by_id(self, customer_delete_id: int) -> bool:
         pass

@@ -10,7 +10,7 @@ class BankAccountDAOInterface(ABC):
         pass
 
     @abstractmethod
-    def get_account_by_id(self, account_id: int) -> BankAccount:
+    def get_account_by_id(self, account_search_id: int) -> BankAccount:
         pass
 
     @abstractmethod
