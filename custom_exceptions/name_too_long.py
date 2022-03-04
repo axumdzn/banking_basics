@@ -1,0 +1,2 @@
+class NameTooLong(Exception):
+    pass

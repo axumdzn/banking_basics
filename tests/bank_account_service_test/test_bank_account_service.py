@@ -56,7 +56,7 @@ def test_service_get_all_accounts_for_user_customer_id_is_int():
 # service_withdraw_from_account_by_id
 def test_service_withdraw_from_account_by_id_bank_id_is_int():
     try:
-        result = service_bank.service_withdraw_from_account_by_id("one",200)
+        result = service_bank.service_withdraw_from_account_by_id("one", 200)
         assert False
     except BadInput as e:
         assert str(e) == "Wrong type of input entered"
