@@ -9,6 +9,13 @@ customer_dao = CustomerDAOImp()
 customer_service = CustomerServiceImp(customer_dao)
 
 
+# needs to test success for each method
+def test_service_create_customer_success():
+    test = Customer(0, "Bobby", "Flay")
+    result = customer_service.service_create_customer(test)
+    assert result.customer_id == 0
+
+
 # create customer
 def test_service_create_customer_first_name_datatype():
     try:
@@ -21,7 +28,7 @@ def test_service_create_customer_first_name_datatype():
 
 def test_service_create_customer_first_name_length():
     try:
-        test = Customer(0, "askjldfasl;kdjfl;askdjfl;askjsdfsa","Smith")
+        test = Customer(0, "askjldfaslkdjflskdjflaskjsdfsa", "Smith")
         result = customer_service.service_create_customer(test)
         assert False
     except NameTooLong as e:
@@ -37,6 +44,15 @@ def test_service_create_customer_last_name_datatype():
         assert str(e) == "Please enter a correct last name"
 
 
+def test_service_create_customer_last_name_length():
+    try:
+        test = Customer(0, "John", "askjldfaslkdjflskdjflaskjsdfsa")
+        result = customer_service.service_create_customer(test)
+        assert False
+    except NameTooLong as e:
+        assert str(e) == "Please enter name with less than 20 characters"
+
+
 # service_delete_customer_by_id
 def test_service_delete_customer_by_id_non_int():
     try:
@@ -44,3 +60,9 @@ def test_service_delete_customer_by_id_non_int():
         assert False
     except BadInput as e:
         assert str(e) == "Please enter a correct customer id number"
+
+
+def test_service_delete_customer_by_id_success():
+    result = customer_service.service_delete_customer_by_id(0)
+    assert result is True
+

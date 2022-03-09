@@ -20,7 +20,7 @@ def test_unique_id():
 # test delete
 
 
-def test_delete_by_id():
+def test_delete_by_id_success():
     result = customer_dao.delete_customer_by_id(0)
     assert result is True
 

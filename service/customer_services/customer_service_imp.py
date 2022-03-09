@@ -6,7 +6,7 @@ from service.customer_services.customer_service_interface import CustomerService
 
 class CustomerServiceImp(CustomerServiceInterface):
 
-    def __init__(self, customer_list : CustomerInterface):
+    def __init__(self, customer_list: CustomerInterface):
         self.customer_list = customer_list
 
     def service_create_customer(self, customer: Customer) -> Customer:
