@@ -23,7 +23,7 @@ class BankAccountDaoPostgres(BankAccountDAOInterface):
         if bank_record is None:
             raise IdNotFound("An account with this id does not exist: please try again")
         else:
-            return bank_record
+            return BankAccount(*bank_record)
 
     def get_all_accounts_for_user(self, customer_id: int) -> [BankAccount]:
         sql = "select * from bank_account where customer_id = %s"
@@ -36,7 +36,7 @@ class BankAccountDaoPostgres(BankAccountDAOInterface):
             raise IdNotFound("An account with this id does not exist: please try again")
         else:
             for bank in bank_record:
-                bank_list.append(BankAccount(bank))
+                bank_list.append(BankAccount(*bank))
             return bank_list
 
     def withdraw_from_account_by_id(self, account_id: int, withdraw_amount: int) -> BankAccount:
@@ -46,19 +46,61 @@ class BankAccountDaoPostgres(BankAccountDAOInterface):
         bank_record = cursor.fetchone()
         if bank_record is None:
             raise IdNotFound("An account with this id does not exist: please try again")
-        elif bank_record.cash_amount > withdraw_amount:
+        elif bank_record.cash_amount < withdraw_amount:
             raise NegativeValueInAccount("Took too much money, negative values not allowed")
         else:
             bank_record.cash_amount -= withdraw_amount
+            sql = "update bank_account set cash_amount = cash amount - %s where bank_id = %s"
+            cursor.execute(sql, (withdraw_amount, account_id))
+        bank_team = BankAccount(*bank_record)
         connection.commit()
-
+        return bank_team
 
     def deposit_into_account_by_id(self, account_id: int, deposit_amount: int) -> BankAccount:
-        pass
+        sql = "select * from bank_account where bank_id = %s"
+        cursor = connection.cursor()
+        cursor.execute(sql, [account_id])
+        bank_record = cursor.fetchone()
+        if bank_record is None:
+            raise IdNotFound("An account with this id does not exist: please try again")
+        else:
+            bank_record.cash_amount += deposit_amount
+            sql = "update bank_account set cash_amount = cash amount + %s where bank_id = %s"
+            cursor.execute(sql, (deposit_amount, account_id))
+        bank_team = BankAccount(*bank_record)
+        connection.commit()
+        return bank_team
 
     def transfer_money_between_accounts_by_their_ids(self, account_id_to_withdraw: int, account_id_to_deposit: int,
                                                      transfer_amount: int) -> bool:
-        pass
+        sql = "select * from bank_account where bank_id = %s or bank_id = %s"
+        cursor = connection.cursor()
+        cursor.execute(sql, (account_id_to_withdraw, account_id_to_deposit))
+        bank_record = cursor.fetchall()
+        if len(bank_record) is 0:
+            raise IdNotFound("An account with this id does not exist: please try again")
+        elif bank_record[0].cash_amount < transfer_amount:
+            raise NegativeValueInAccount("Took too much money, negative values not allowed")
+        else:
+            bank_record[0].cash_amount -= transfer_amount
+            bank_record[1].cash_amount += transfer_amount
+            sql = "update bank_account set cash_amount = cash amount - %s where bank_id = %s"
+            sql2 = "update bank_account set cash_amount = cash amount + %s where bank_id = %s"
+            cursor.execute(sql, (transfer_amount, account_id_to_withdraw))
+            cursor.execute(sql2, (transfer_amount, account_id_to_deposit))
+        bank_team = []
+        for bank in bank_record:
+            bank_team = BankAccount(*bank)
+        connection.commit()
+        return bank_team
 
     def delete_account_by_id(self, account_id: int) -> bool:
-        pass
+        sql = "delete from bank_account where bank_id = %s"
+        cursor = connection.cursor()
+        cursor.execute(sql, [account_id])
+        connection.commit()
+        if cursor.rowcount != 0:
+            return True
+        else:
+            raise IdNotFound("No customer matches this id given: please try again")
+
