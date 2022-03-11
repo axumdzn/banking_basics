@@ -32,7 +32,7 @@ class BankAccountDaoPostgres(BankAccountDAOInterface):
         bank_record = cursor.fetchall()
         connection.commit()
         bank_list = []
-        if len(bank_record) is 0:
+        if len(bank_record) == 0:
             raise IdNotFound("An account with this id does not exist: please try again")
         else:
             for bank in bank_record:
