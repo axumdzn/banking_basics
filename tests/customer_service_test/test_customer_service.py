@@ -1,19 +1,19 @@
 from custom_exceptions.bad_input import BadInput
 from custom_exceptions.name_too_long import NameTooLong
-from dal.customer_dao.customer_dao_imp import CustomerDAOImp
-from service.customer_services.customer_service_imp import CustomerServiceImp
+from dal.customer_dao.customer_dao_postgres import CustomerDaoPostgres
+from service.customer_services.customer_service_postgres import CustomerServiceImpPostgres
 from entities.customer_class_information import Customer
 
 
-customer_dao = CustomerDAOImp()
-customer_service = CustomerServiceImp(customer_dao)
+customer_dao = CustomerDaoPostgres()
+customer_service = CustomerServiceImpPostgres(customer_dao)
 
 
 # needs to test success for each method
 def test_service_create_customer_success():
     test = Customer(0, "Bobby", "Flay")
     result = customer_service.service_create_customer(test)
-    assert result.customer_id == 0
+    assert result.first_name == "Bobby"
 
 
 # create customer
@@ -63,6 +63,6 @@ def test_service_delete_customer_by_id_non_int():
 
 
 def test_service_delete_customer_by_id_success():
-    result = customer_service.service_delete_customer_by_id(0)
+    result = customer_service.service_delete_customer_by_id(1)
     assert result is True
 

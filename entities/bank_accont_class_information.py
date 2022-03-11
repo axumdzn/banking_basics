@@ -1,9 +1,9 @@
 class BankAccount:
 
-    def __init__(self, customer_id: int, bank_id: int, cash_amount: int):
+    def __init__(self, bank_id: int, balance: int, customer_id: int):
         self.customer_id = customer_id
         self.bank_id = bank_id
-        self.cash_amount = cash_amount
+        self.balance = balance
 
 
 """

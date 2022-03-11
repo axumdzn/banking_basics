@@ -1,14 +1,14 @@
 from custom_exceptions.id_not_found import IdNotFound
-from dal.customer_dao.customer_dao_imp import CustomerDAOImp
+from dal.customer_dao.customer_dao_postgres import CustomerDaoPostgres
 from entities.customer_class_information import Customer
 
-customer_dao = CustomerDAOImp()
+customer_dao = CustomerDaoPostgres()
 
 
 def test_create_customer_success():
     test_customer = Customer(0, "Bob", "Smith")
     result = customer_dao.create_customer(test_customer)
-    assert result.customer_id == 0
+    assert result.customer_id == 5
 
 
 def test_unique_id():
@@ -21,7 +21,7 @@ def test_unique_id():
 
 
 def test_delete_by_id_success():
-    result = customer_dao.delete_customer_by_id(0)
+    result = customer_dao.delete_customer_by_id(3)
     assert result is True
 
 

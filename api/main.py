@@ -83,3 +83,5 @@ def api_delete_account_by_id(account_id: str):
     result = bank_service.service_delete_account_by_id(account_id)
     return jsonify(result), 200
 
+
+app.run()

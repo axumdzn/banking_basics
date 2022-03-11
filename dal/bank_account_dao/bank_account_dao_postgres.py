@@ -7,9 +7,9 @@ from util.manage_connection import connection
 
 class BankAccountDaoPostgres(BankAccountDAOInterface):
     def create_account(self, bank_account: BankAccount) -> BankAccount:
-        sql = "insert into bank_account(default, %s, %s) returning bank_id"
+        sql = "insert into bank_account values(default, %s, %s) returning bank_id"
         cursor = connection.cursor()
-        cursor.execute(sql, (bank_account.cash_amount, bank_account.customer_id))
+        cursor.execute(sql, (bank_account.balance, bank_account.customer_id))
         connection.commit()
         bank_account.bank_id = cursor.fetchone()[0]
         return bank_account
@@ -46,13 +46,13 @@ class BankAccountDaoPostgres(BankAccountDAOInterface):
         bank_record = cursor.fetchone()
         if bank_record is None:
             raise IdNotFound("An account with this id does not exist: please try again")
-        elif bank_record.cash_amount < withdraw_amount:
+        bank_team = BankAccount(*bank_record)
+        if bank_team.balance - withdraw_amount < 0:
             raise NegativeValueInAccount("Took too much money, negative values not allowed")
         else:
-            bank_record.cash_amount -= withdraw_amount
-            sql = "update bank_account set cash_amount = cash amount - %s where bank_id = %s"
+            bank_team.balance -= withdraw_amount
+            sql = "update bank_account set balance = balance - %s where bank_id = %s"
             cursor.execute(sql, (withdraw_amount, account_id))
-        bank_team = BankAccount(*bank_record)
         connection.commit()
         return bank_team
 
@@ -63,11 +63,10 @@ class BankAccountDaoPostgres(BankAccountDAOInterface):
         bank_record = cursor.fetchone()
         if bank_record is None:
             raise IdNotFound("An account with this id does not exist: please try again")
-        else:
-            bank_record.cash_amount += deposit_amount
-            sql = "update bank_account set cash_amount = cash amount + %s where bank_id = %s"
-            cursor.execute(sql, (deposit_amount, account_id))
         bank_team = BankAccount(*bank_record)
+        bank_team.balance += deposit_amount
+        sql = "update bank_account set balance = balance + %s where bank_id = %s"
+        cursor.execute(sql, (deposit_amount, account_id))
         connection.commit()
         return bank_team
 
@@ -77,22 +76,20 @@ class BankAccountDaoPostgres(BankAccountDAOInterface):
         cursor = connection.cursor()
         cursor.execute(sql, (account_id_to_withdraw, account_id_to_deposit))
         bank_record = cursor.fetchall()
-        if len(bank_record) is 0:
+        withdraw_account: BankAccount
+        if len(bank_record) < 2:
             raise IdNotFound("An account with this id does not exist: please try again")
-        elif bank_record[0].cash_amount < transfer_amount:
+        for bank in bank_record:
+            if bank[0] == account_id_to_withdraw:
+                withdraw_account = BankAccount(*bank)
+        if withdraw_account.balance - transfer_amount < 0:
             raise NegativeValueInAccount("Took too much money, negative values not allowed")
         else:
-            bank_record[0].cash_amount -= transfer_amount
-            bank_record[1].cash_amount += transfer_amount
-            sql = "update bank_account set cash_amount = cash amount - %s where bank_id = %s"
-            sql2 = "update bank_account set cash_amount = cash amount + %s where bank_id = %s"
+            sql = "update bank_account set balance = balance - %s where bank_id = %s"
+            sql2 = "update bank_account set balance = balance + %s where bank_id = %s"
             cursor.execute(sql, (transfer_amount, account_id_to_withdraw))
             cursor.execute(sql2, (transfer_amount, account_id_to_deposit))
-        bank_team = []
-        for bank in bank_record:
-            bank_team = BankAccount(*bank)
-        connection.commit()
-        return bank_team
+            return True
 
     def delete_account_by_id(self, account_id: int) -> bool:
         sql = "delete from bank_account where bank_id = %s"
@@ -102,5 +99,5 @@ class BankAccountDaoPostgres(BankAccountDAOInterface):
         if cursor.rowcount != 0:
             return True
         else:
-            raise IdNotFound("No customer matches this id given: please try again")
+            raise IdNotFound("An account with this id does not exist: please try again")
 

@@ -5,7 +5,7 @@ from entities.bank_accont_class_information import BankAccount
 from service.bank_account_services.bank_account_services_interface import BankAccountServiceInterface
 
 
-class BankAccountServiceImp(BankAccountServiceInterface):
+class BankAccountServiceImpPostgres(BankAccountServiceInterface):
 
     def __init__(self, bank_account_dao: BankAccountDaoPostgres):
         self.bank_account_dao = bank_account_dao
@@ -13,9 +13,9 @@ class BankAccountServiceImp(BankAccountServiceInterface):
     def service_create_account(self, bank_account: BankAccount) -> BankAccount:
         if type(bank_account.customer_id) != int:
             raise BadInput("Please enter a valid customer id")
-        elif type(bank_account.cash_amount) != int:
+        elif type(bank_account.balance) != int:
             raise BadInput("Please enter a valid cash amount")
-        elif bank_account.cash_amount < 0:
+        elif bank_account.balance < 0:
             raise NegativeValueInAccount("Value cannot be negative, please enter positive integers")
         else:
             return self.bank_account_dao.create_account(bank_account)

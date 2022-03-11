@@ -5,8 +5,10 @@ from entities.bank_accont_class_information import BankAccount
 
 
 class BankAccountDAOImp(BankAccountDAOInterface):
-    bank_account_list = []
-    bank_account_id_increment = 0
+
+    def __init__(self):
+        self.bank_account_list = []
+        self.bank_account_id_increment = 0
 
     def create_account(self, bank_account: BankAccount) -> BankAccount:
         bank_account.bank_id = self.bank_account_id_increment
@@ -33,17 +35,17 @@ class BankAccountDAOImp(BankAccountDAOInterface):
     def withdraw_from_account_by_id(self, account_id: int, withdraw_amount: int) -> BankAccount:
         for bank_account in self.bank_account_list:
             if bank_account.bank_id == account_id:
-                if bank_account.cash_amount - withdraw_amount < 0:
+                if bank_account.balance - withdraw_amount < 0:
                     raise NegativeValueInAccount("Took too much money, negative values not allowed")
                 else:
-                    bank_account.cash_amount -= withdraw_amount
+                    bank_account.balance -= withdraw_amount
                     return bank_account
         raise IdNotFound("An account with this id does not exist: please try again")
 
     def deposit_into_account_by_id(self, account_id: int, deposit_amount: int) -> BankAccount:
         for bank_account in self.bank_account_list:
             if bank_account.bank_id == account_id:
-                bank_account.cash_amount += deposit_amount
+                bank_account.balance += deposit_amount
                 return bank_account
         raise IdNotFound("An account with this id does not exist: please try again")
 
@@ -57,11 +59,11 @@ class BankAccountDAOImp(BankAccountDAOInterface):
             elif account_id_to_withdraw == bank_account.bank_id:
                 withdraw_account = bank_account
         if withdraw_account.bank_id == account_id_to_withdraw and deposit_account.bank_id == account_id_to_deposit:
-            if withdraw_account.cash_amount - transfer_amount < 0:
+            if withdraw_account.balance - transfer_amount < 0:
                 raise NegativeValueInAccount("Took too much money, negative values not allowed")
             else:
-                withdraw_account.cash_amount -= transfer_amount
-                deposit_account.cash_amount += transfer_amount
+                withdraw_account.balance -= transfer_amount
+                deposit_account.balance += transfer_amount
                 return True
         else:
             raise IdNotFound("An account with this id does not exist: please try again")
